@@ -19,7 +19,6 @@ func handleWebhook(c *gin.Context) {
 	var err error
 
 	req := dialogflow.WebhookRequest{}
-
 	if err = jsonpb.Unmarshal(c.Request.Body, &req); err != nil {
 		logrus.WithError(err).Error("Unable to unmarshal request to jsonpb")
 		c.Status(http.StatusBadRequest)
@@ -31,8 +30,18 @@ func handleWebhook(c *gin.Context) {
 		logrus.WithError(err)
 	}
 
+	marshaller := jsonpb.Marshaler{
+		Indent: " ",
+	}
+	respStr, err := marshaller.MarshalToString(resp)
+	if err != nil {
+		logrus.WithError(err).Error("Unable to marshall request to JSON")
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
 	// send response back
-	c.JSON(http.StatusOK, resp)
+	c.String(http.StatusOK, respStr)
 }
 
 func main() {
