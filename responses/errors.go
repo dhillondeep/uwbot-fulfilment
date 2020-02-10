@@ -28,7 +28,7 @@ func CourseSectionInfoNotFound (subject, catalogNum, section string) (*dialogflo
 
 /********* Term Errors *********/
 
-func CourseNotFoundNextTerm(subject, catalogNum string) (*dialogflow.WebhookResponse, error) {
-	respStr := "Sorry, I was "
+func CourseSectionsNotFound(subject, catalogNum string) (*dialogflow.WebhookResponse, error) {
+	respStr := "Sorry, I wasn't able to find any sections for %s %s"
 	return TextResponsef(respStr, subject, catalogNum)
 }

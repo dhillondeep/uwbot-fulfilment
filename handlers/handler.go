@@ -18,6 +18,8 @@ func HandleRequest(req *dialogflow.WebhookRequest, uwClient *uwapi.UWAPI) (*dial
 	switch intentCat {
 	case CourseIntent:
 		return HandleCourseReq(req.QueryResult, uwClient)
+	case TermIntent:
+		return HandleTermReq(req.QueryResult, uwClient)
 	default:
 		return nil, errors.New("handler does not exist for intent category: " + intentCat)
 	}
