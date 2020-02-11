@@ -42,6 +42,10 @@ func HandleWebhook(request io.Reader, uwApiClient *uwapi.UWAPI) (string, error) 
 		logrus.WithError(err)
 	}
 
+	if resp == nil {
+		return "", nil
+	}
+
 	marshaller := jsonpb.Marshaler{
 		Indent: " ",
 	}
