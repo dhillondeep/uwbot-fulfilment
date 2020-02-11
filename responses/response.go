@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"google.golang.org/genproto/googleapis/cloud/dialogflow/v2"
 	"strings"
-	"warrior_bot/models"
+	"uwbot/models"
 )
 
 // TextResponse creates dialogflow webhook response for simple text

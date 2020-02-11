@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"warrior_bot/handlers"
+	"uwbot/handlers"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/dhillondeep/go-uw-api"

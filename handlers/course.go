@@ -8,9 +8,9 @@ import (
 	"google.golang.org/genproto/googleapis/cloud/dialogflow/v2"
 	"net/http"
 	"strings"
-	"warrior_bot/helpers"
-	"warrior_bot/models"
-	"warrior_bot/responses"
+	"uwbot/helpers"
+	"uwbot/models"
+	"uwbot/responses"
 )
 
 const uwflowCourseUrl = "https://uwflow.com/course/%s%s"
