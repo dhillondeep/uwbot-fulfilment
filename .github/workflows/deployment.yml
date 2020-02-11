@@ -1,8 +1,12 @@
-name: deploy to lambda
-on: [push]
+name: Deployment
+on:
+  push:
+    branches:
+      master
+
 jobs:
-  deploy_zip:
-    name: deploy lambda function
+  deploy_lambda:
+    name: deploy uwbot as lambda
     runs-on: ubuntu-latest
     strategy:
       matrix:
