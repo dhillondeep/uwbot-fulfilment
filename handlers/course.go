@@ -54,8 +54,8 @@ func HandleCourseReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*d
 				Subtitle: strings.TrimSpace(termsStr),
 				Buttons: []models.FbButton{
 					{
-						Type: "web_url",
-						Url: fmt.Sprintf(uwflowCourseUrl, subject, catalogNum),
+						Type:  "web_url",
+						Url:   fmt.Sprintf(uwflowCourseUrl, subject, catalogNum),
 						Title: "More Info",
 					},
 				},
@@ -111,8 +111,8 @@ func HandleCourseReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*d
 				Subtitle: strings.TrimSpace(sectionsStr),
 				Buttons: []models.FbButton{
 					{
-						Type: "web_url",
-						Url: fmt.Sprintf(uwflowCourseUrl, subject, catalogNum),
+						Type:  "web_url",
+						Url:   fmt.Sprintf(uwflowCourseUrl, subject, catalogNum),
 						Title: "More Info",
 					},
 				},
@@ -157,8 +157,8 @@ func HandleCourseReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*d
 						Subtitle: strings.TrimSpace(infoStr),
 						Buttons: []models.FbButton{
 							{
-								Type: "web_url",
-								Url: fmt.Sprintf(uwflowCourseUrl, subject, catalogNum),
+								Type:  "web_url",
+								Url:   fmt.Sprintf(uwflowCourseUrl, subject, catalogNum),
 								Title: "More Info",
 							},
 						},
