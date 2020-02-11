@@ -1,4 +1,4 @@
-module warrior_bot
+module uwbot
 
 go 1.13
 
