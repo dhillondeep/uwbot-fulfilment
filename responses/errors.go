@@ -21,7 +21,7 @@ func CoursePrerequisitesNotFound(subject, catalogNum string) (*dialogflow.Webhoo
 	return TextResponsef(respStr, subject, catalogNum)
 }
 
-func CourseSectionInfoNotFound (subject, catalogNum, section string) (*dialogflow.WebhookResponse, error) {
+func CourseSectionInfoNotFound(subject, catalogNum, section string) (*dialogflow.WebhookResponse, error) {
 	respStr := "Sorry, I was unable to find information about %s %s %s"
 	return TextResponsef(respStr, subject, catalogNum, section)
 }

@@ -64,7 +64,7 @@ func HandleTermReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*dia
 		}
 
 		var items []models.FbCarouselItem
-		count, err:= helpers.IterateContainerData(currTermInfo, "data", func(path *gabs.Container) error {
+		count, err := helpers.IterateContainerData(currTermInfo, "data", func(path *gabs.Container) error {
 			courseSection := path.Path("section").Data().(string)
 			enrollmentCap := path.Path("enrollment_capacity").String()
 			enrollmentTotal := path.Path("enrollment_total").String()
@@ -80,8 +80,8 @@ func HandleTermReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*dia
 				Subtitle: strings.TrimSpace(subTextStr),
 				Buttons: []models.FbButton{
 					{
-						Type: "web_url",
-						Url: fmt.Sprintf(uwflowCourseUrl, subject, catalogNum),
+						Type:  "web_url",
+						Url:   fmt.Sprintf(uwflowCourseUrl, subject, catalogNum),
 						Title: "More Info",
 					},
 				},

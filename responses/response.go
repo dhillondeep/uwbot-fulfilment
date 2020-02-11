@@ -14,7 +14,7 @@ func TextResponse(text string) (*dialogflow.WebhookResponse, error) {
 
 // TextResponsef creates dialogflow webhook response for simple text but,
 // it allows the text to be formatted
-func TextResponsef(format string, a ...interface{}) (*dialogflow.WebhookResponse, error){
+func TextResponsef(format string, a ...interface{}) (*dialogflow.WebhookResponse, error) {
 	return TextResponse(fmt.Sprintf(format, a...))
 }
 

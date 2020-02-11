@@ -31,13 +31,13 @@ func lambdaHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProx
 	respStr, err := handlers.HandleWebhook(strings.NewReader(request.Body), &uwApiClient)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
-			Body: respStr,
+			Body:       respStr,
 			StatusCode: http.StatusBadRequest,
 		}, err
 	}
 
 	return events.APIGatewayProxyResponse{
-		Body: respStr,
+		Body:       respStr,
 		StatusCode: http.StatusOK,
 	}, nil
 }
