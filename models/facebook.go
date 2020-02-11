@@ -42,6 +42,12 @@ func CreateFbCarouselCard(item FbCarouselItem) *FbCarousel {
 // CreateFbCarousel creates a carousel cards on messenger
 // This supports many cards and should be used as a lit
 func CreateFbCarousel(items []FbCarouselItem) *FbCarousel {
+	itemsShow := items
+
+	if len(itemsShow) > 10 {
+		itemsShow = itemsShow[:10]
+	}
+
 	carousel := &FbCarousel{
 		Payload: payload{
 			Facebook: facebook{
@@ -49,7 +55,7 @@ func CreateFbCarousel(items []FbCarouselItem) *FbCarousel {
 					Type: "template",
 					Payload: facebookPayload{
 						TemplateType: "generic",
-						Elements:     items,
+						Elements:     itemsShow,
 					},
 				},
 			},
