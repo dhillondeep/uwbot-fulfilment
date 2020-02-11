@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"warrior_bot/handlers"
+	"uwbot/handlers"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/dhillondeep/go-uw-api"
@@ -46,7 +46,7 @@ func main() {
 	// create a client for Uwaterloo API
 	uwApiClient = uwapi.Create(os.Getenv("UW_API_KEY"))
 
-	if len(os.Getenv("AWS_LAMBDA_USE")) != 0 {
+	if _, exists := os.LookupEnv("AWS_LAMBDA_USE"); exists {
 		lambda.Start(lambdaHandler)
 	} else {
 		r := gin.Default()

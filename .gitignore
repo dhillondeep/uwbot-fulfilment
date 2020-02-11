@@ -12,7 +12,8 @@
 *.out
 
 # Build output
-warrior_bot
+uwbot
+uwbot.zip
 
 # jetbrains
 .idea/
