@@ -22,6 +22,9 @@ func HandleTermReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*dia
 	subject := courseInfo[0]
 	catalogNum := courseInfo[1]
 
+	// fetch section information if any
+	sectionGiven := fields["section"].GetStringValue()
+
 	termsListed, _ := uwClient.Terms.List()
 	nextTerm := termsListed.Path("data.next_term").String()
 	prevTerm := termsListed.Path("data.previous_term").String()
@@ -66,26 +69,29 @@ func HandleTermReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*dia
 		var items []models.FbCarouselItem
 		count, err := helpers.IterateContainerData(currTermInfo, "data", func(path *gabs.Container) error {
 			courseSection := path.Path("section").Data().(string)
-			enrollmentCap := path.Path("enrollment_capacity").String()
-			enrollmentTotal := path.Path("enrollment_total").String()
-			waitingCap := path.Path("waiting_capacity").String()
-			waitingTotal := path.Path("waiting_total").String()
 
-			subTextStr := fmt.Sprintf(
-				"Enrollment Capacity: %s\nEnrollment Total: %s\nWaiting: %s/%s\n",
-				enrollmentCap, enrollmentTotal, waitingCap, waitingTotal)
+			if sectionGiven == "" || helpers.StringEqualNoCase(sectionGiven, courseSection) {
+				enrollmentCap := path.Path("enrollment_capacity").String()
+				enrollmentTotal := path.Path("enrollment_total").String()
+				waitingCap := path.Path("waiting_capacity").String()
+				waitingTotal := path.Path("waiting_total").String()
 
-			items = append(items, models.FbCarouselItem{
-				Title:    fmt.Sprintf("%s %s %s", subject, catalogNum, courseSection),
-				Subtitle: strings.TrimSpace(subTextStr),
-				Buttons: []models.FbButton{
-					{
-						Type:  "web_url",
-						Url:   fmt.Sprintf(uwflowCourseUrl, subject, catalogNum),
-						Title: "More Info",
+				subTextStr := fmt.Sprintf(
+					"Enrollment Capacity: %s\nEnrollment Total: %s\nWaiting: %s/%s\n",
+					enrollmentCap, enrollmentTotal, waitingCap, waitingTotal)
+
+				items = append(items, models.FbCarouselItem{
+					Title:    fmt.Sprintf("%s", courseSection),
+					Subtitle: strings.TrimSpace(subTextStr),
+					Buttons: []models.FbButton{
+						{
+							Type:  "web_url",
+							Url:   fmt.Sprintf(uwflowCourseUrl, subject, catalogNum),
+							Title: "More Info",
+						},
 					},
-				},
-			})
+				})
+			}
 
 			return nil
 		})

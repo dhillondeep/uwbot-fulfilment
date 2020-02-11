@@ -133,7 +133,8 @@ func HandleCourseReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*d
 			return responses.CoursePrerequisitesNotFound(subject, catalogNum)
 		}
 
-		return responses.TextResponse(strings.Replace(prerequisites, "Prereq: ", "", 1))
+		return responses.TextResponse(strings.Trim(
+			strings.Replace(prerequisites, "Prereq: ", "", 1), "."))
 	case CourseSectionSchedule:
 		jsonData, _ := uwClient.Courses.ScheduleByCatalogNumber(subject, catalogNum)
 
@@ -148,12 +149,12 @@ func HandleCourseReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*d
 		if _, err := helpers.IterateContainerData(jsonData, "data", func(path *gabs.Container) error {
 			section := path.Path("section").Data().(string)
 
-			if helpers.StringEqualNoCase(sectionGiven, section) {
+			if sectionGiven == "" || helpers.StringEqualNoCase(sectionGiven, section) {
 				// iterate over each class for that section
 				if _, err := helpers.IterateContainerData(path, "classes", func(path *gabs.Container) error {
 					infoStr := helpers.CreateCourseSectionSchedule(path)
 					items = append(items, models.FbCarouselItem{
-						Title:    sectionGiven,
+						Title:    section,
 						Subtitle: strings.TrimSpace(infoStr),
 						Buttons: []models.FbButton{
 							{
