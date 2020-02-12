@@ -100,7 +100,7 @@ func HandleTermReq(context *models.ReqContext) (*models.RespContext, error) {
 		if count > 0 {
 			return responses.FbCarousel(items), nil
 		} else {
-			return responses.CourseSectionsNotFound(subject, catalogNum), nil
+			return responses.NoCourseSecFound(subject, catalogNum), nil
 		}
 	default:
 		return nil, errors.New("handler does not exist for term intent: " + intentName)

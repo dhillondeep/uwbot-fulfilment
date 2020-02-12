@@ -13,7 +13,7 @@ type facebookPayload struct {
 
 type facebookAttachment struct {
 	Type    string          `json:"type"`
-	Payload facebookPayload `json:"payload,"`
+	Payload facebookPayload `json:"payload"`
 }
 
 type facebook struct {
@@ -22,7 +22,7 @@ type facebook struct {
 
 type FbCarouselItem struct {
 	Title    string     `json:"title"`
-	Subtitle string     `json:"subtitle,omitempty"`
+	Subtitle string     `json:"subtitle"`
 	Buttons  []FbButton `json:"buttons,omitempty"`
 }
 
@@ -41,7 +41,7 @@ func CreateFbCarousel(items []FbCarouselItem) *DialogflowResponse {
 	}
 
 	carousel := &DialogflowResponse{
-		Payload: payload{
+		Payload: &payload{
 			Facebook: facebook{
 				Attachment: facebookAttachment{
 					Type: "template",

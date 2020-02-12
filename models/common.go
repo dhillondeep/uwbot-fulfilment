@@ -20,9 +20,9 @@ type payload struct {
 }
 
 type DialogflowResponse struct {
-	FulfillmentText string  `json:"fulfillment_text,omitempty"`
-	Payload         payload `json:"payload,omitempty"`
-	Source          string  `json:"source,omitempty"`
+	FulfillmentText string   `json:"fulfillment_text,omitempty"`
+	Payload         *payload `json:"payload,omitempty"`
+	Source          string   `json:"source,omitempty"`
 }
 
 // CreateTextResponse creates basic text response

@@ -3,6 +3,7 @@ package helpers
 import (
 	"fmt"
 	"github.com/Jeffail/gabs/v2"
+	"strings"
 )
 
 func CreateCourseSectionSchedule(class *gabs.Container) string {
@@ -36,4 +37,8 @@ func CreateCourseSectionSchedule(class *gabs.Container) string {
 	}
 
 	return schStrClass
+}
+
+func CleanPrereqString(prerequisites string) string {
+	return strings.Trim(strings.Replace(prerequisites, "Prereq: ", "", 1), ".")
 }
