@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"github.com/pkg/errors"
+	"net/http"
 	"strings"
+	"uwbot/helpers"
 	"uwbot/models"
 )
 
@@ -14,8 +16,10 @@ func HandleWebhook(context *models.ReqContext) (*models.RespContext, error) {
 	intentCat := strings.Split(request.QueryResult.Intent.DisplayName, "_")[1]
 
 	// we already have fulfilment text provided to us so we shouldn't do anything
-	if strings.TrimSpace(request.QueryResult.FulfillmentText) != "" {
-		return nil, nil
+	if !helpers.StringIsEmpty(request.QueryResult.FulfillmentText) {
+		return &models.RespContext{
+			StatusCode: http.StatusOK,
+		}, nil
 	}
 
 	switch intentCat {

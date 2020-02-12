@@ -2,20 +2,19 @@ package main
 
 import (
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/dhillondeep/go-uw-api"
+	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/jsonpb"
-	jsoniter "github.com/json-iterator/go"
+	"github.com/json-iterator/go"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/genproto/googleapis/cloud/dialogflow/v2"
 	"io"
 	"os"
 	"strings"
 	"uwbot/handlers"
 	"uwbot/models"
-
-	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/dhillondeep/go-uw-api"
-	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 var uwApiClient uwapi.UWAPI

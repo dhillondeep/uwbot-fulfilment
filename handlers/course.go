@@ -34,7 +34,7 @@ func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 
 		// verify course exists
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
-			return responses.CourseNotFoundError(subject, catalogNum), nil
+			return responses.CourseNotFound(subject, catalogNum), nil
 		}
 
 		var termsStr string
@@ -59,14 +59,14 @@ func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 				},
 			}), nil
 		} else {
-			return responses.CourseOfferingError(subject, catalogNum), nil
+			return responses.CourseOfferingNotFound(subject, catalogNum), nil
 		}
 	case CourseAvailabilityGivenTerm:
 		jsonData, _ := context.UWApiClient.Courses.InfoByCatalogNumber(subject, catalogNum)
 
 		// verify course exists
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
-			return responses.CourseNotFoundError(subject, catalogNum), nil
+			return responses.CourseNotFound(subject, catalogNum), nil
 		}
 
 		offered := false
@@ -90,7 +90,7 @@ func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 
 		// verify course exists
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
-			return responses.CourseNotFoundError(subject, catalogNum), nil
+			return responses.CourseNotFound(subject, catalogNum), nil
 		}
 
 		var sectionsStr string
@@ -121,24 +121,19 @@ func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 	case CoursePrerequisites:
 		jsonData, _ := context.UWApiClient.Courses.PrereqsByCatalogNumber(subject, catalogNum)
 
-		// verify course exists
+		// verify if prerequisite exist
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
-			return responses.CourseNotFoundError(subject, catalogNum), nil
+			return responses.CoursePrereqNotFound(subject, catalogNum), nil
 		}
 
-		prerequisites, ok := jsonData.Path("data.prerequisites").Data().(string)
-		if !ok {
-			return responses.CoursePrerequisitesNotFound(subject, catalogNum), nil
-		}
-
-		return responses.TextResponse(strings.Trim(
-			strings.Replace(prerequisites, "Prereq: ", "", 1), ".")), nil
+		prerequisites := jsonData.Path("data.prerequisites").Data().(string)
+		return responses.TextResponse(helpers.CleanPrereqString(prerequisites)), nil
 	case CourseSectionSchedule:
 		jsonData, _ := context.UWApiClient.Courses.ScheduleByCatalogNumber(subject, catalogNum)
 
 		// verify course exists
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
-			return responses.CourseNotFoundError(subject, catalogNum), nil
+			return responses.CourseNotFound(subject, catalogNum), nil
 		}
 
 		var items []models.FbCarouselItem
@@ -147,7 +142,7 @@ func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 		if _, err := helpers.IterateContainerData(jsonData, "data", func(path *gabs.Container) error {
 			section := path.Path("section").Data().(string)
 
-			if sectionGiven == "" || helpers.StringEqualNoCase(sectionGiven, section) {
+			if helpers.StringIsEmpty(sectionGiven) || helpers.StringEqualNoCase(sectionGiven, section) {
 				// iterate over each class for that section
 				if _, err := helpers.IterateContainerData(path, "classes", func(path *gabs.Container) error {
 					infoStr := helpers.CreateCourseSectionSchedule(path)
@@ -177,7 +172,7 @@ func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 		if len(items) > 0 {
 			return responses.FbCarousel(items), nil
 		} else {
-			return responses.CourseSectionInfoNotFound(subject, catalogNum, sectionGiven), nil
+			return responses.NoCourseSecFound(subject, catalogNum), nil
 		}
 	default:
 		return nil, errors.New("handler does not exist for course intent: " + intentName)

@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var terms = map[string]string{"w": "Winter", "s": "Spring", "f": "Fall"}
+var termsShortHand = map[string]string{"w": "Winter", "s": "Spring", "f": "Fall"}
 
 // iterates over json array provides gabs container and path. It callbacks the user provided function
 func IterateContainerData(data *gabs.Container, path string, callback func(path *gabs.Container) error) (int, error) {
@@ -29,9 +29,13 @@ func GetStatusCode(container *gabs.Container) float64 {
 }
 
 func ConvertTermShorthandToFull(shorthand string) string {
-	return terms[strings.ToLower(shorthand)]
+	return termsShortHand[strings.ToLower(shorthand)]
 }
 
 func StringEqualNoCase(first, second string) bool {
 	return strings.ToLower(strings.TrimSpace(first)) == strings.ToLower(strings.TrimSpace(second))
+}
+
+func StringIsEmpty(text string) bool {
+	return strings.TrimSpace(text) == ""
 }
