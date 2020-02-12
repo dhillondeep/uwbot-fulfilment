@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Jeffail/gabs/v2"
-	"github.com/dhillondeep/go-uw-api"
-	"google.golang.org/genproto/googleapis/cloud/dialogflow/v2"
 	"net/http"
 	"strings"
 	"uwbot/helpers"
@@ -13,9 +11,9 @@ import (
 	"uwbot/responses"
 )
 
-func HandleTermReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*dialogflow.WebhookResponse, error) {
-	intentName := qResult.Intent.DisplayName
-	fields := qResult.Parameters.Fields
+func HandleTermReq(context *models.ReqContext) (*models.RespContext, error) {
+	intentName := context.DialogflowRequest.QueryResult.Intent.DisplayName
+	fields := context.DialogflowRequest.QueryResult.Parameters.Fields
 
 	// fetch course information if any
 	courseInfo := strings.Split(fields["course"].GetStringValue(), " ")
@@ -25,45 +23,45 @@ func HandleTermReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*dia
 	// fetch section information if any
 	sectionGiven := fields["section"].GetStringValue()
 
-	termsListed, _ := uwClient.Terms.List()
+	termsListed, _ := context.UWApiClient.Terms.List()
 	nextTerm := termsListed.Path("data.next_term").String()
 	prevTerm := termsListed.Path("data.previous_term").String()
 	currTerm := termsListed.Path("data.current_term").String()
 
 	switch intentName {
 	case CourseAvailNextTerm:
-		nextTermInfo, _ := uwClient.Terms.ClassScheduleByTerm(nextTerm, subject, catalogNum)
+		nextTermInfo, _ := context.UWApiClient.Terms.ClassScheduleByTerm(nextTerm, subject, catalogNum)
 
 		// verify course info exists for next term
 		if helpers.GetStatusCode(nextTermInfo) == http.StatusNoContent {
-			return responses.TextResponsef("%s %s is not offered next term", subject, catalogNum)
+			return responses.TextResponsef("%s %s is not offered next term", subject, catalogNum), nil
 		}
 
-		return responses.TextResponsef("yes %s %s is offered next term", subject, catalogNum)
+		return responses.TextResponsef("yes %s %s is offered next term", subject, catalogNum), nil
 	case CourseAvailPrevTerm:
-		prevTermInfo, _ := uwClient.Terms.ClassScheduleByTerm(prevTerm, subject, catalogNum)
+		prevTermInfo, _ := context.UWApiClient.Terms.ClassScheduleByTerm(prevTerm, subject, catalogNum)
 
 		// verify course info exists for next term
 		if helpers.GetStatusCode(prevTermInfo) == http.StatusNoContent {
-			return responses.TextResponsef("%s %s was not offered previous term", subject, catalogNum)
+			return responses.TextResponsef("%s %s was not offered previous term", subject, catalogNum), nil
 		}
 
-		return responses.TextResponsef("yes %s %s was offered previous term", subject, catalogNum)
+		return responses.TextResponsef("yes %s %s was offered previous term", subject, catalogNum), nil
 	case CourseAvailCurrTerm:
-		currTermInfo, _ := uwClient.Terms.ClassScheduleByTerm(currTerm, subject, catalogNum)
+		currTermInfo, _ := context.UWApiClient.Terms.ClassScheduleByTerm(currTerm, subject, catalogNum)
 
 		// verify course info exists for next term
 		if helpers.GetStatusCode(currTermInfo) == http.StatusNoContent {
-			return responses.TextResponsef("%s %s is not offered this term", subject, catalogNum)
+			return responses.TextResponsef("%s %s is not offered this term", subject, catalogNum), nil
 		}
 
-		return responses.TextResponsef("yes %s %s is offered this term", subject, catalogNum)
+		return responses.TextResponsef("yes %s %s is offered this term", subject, catalogNum), nil
 	case CourseEnrolmentInfo:
-		currTermInfo, _ := uwClient.Terms.ClassScheduleByTerm(currTerm, subject, catalogNum)
+		currTermInfo, _ := context.UWApiClient.Terms.ClassScheduleByTerm(currTerm, subject, catalogNum)
 
 		// verify course info exists for next term
 		if helpers.GetStatusCode(currTermInfo) == http.StatusNoContent {
-			return responses.TextResponsef("%s %s is not offered this term", subject, catalogNum)
+			return responses.TextResponsef("%s %s is not offered this term", subject, catalogNum), nil
 		}
 
 		var items []models.FbCarouselItem
@@ -100,9 +98,9 @@ func HandleTermReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*dia
 		}
 
 		if count > 0 {
-			return responses.FbCarousel(items)
+			return responses.FbCarousel(items), nil
 		} else {
-			return responses.CourseSectionsNotFound(subject, catalogNum)
+			return responses.CourseSectionsNotFound(subject, catalogNum), nil
 		}
 	default:
 		return nil, errors.New("handler does not exist for term intent: " + intentName)

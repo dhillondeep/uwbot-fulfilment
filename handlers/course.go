@@ -1,11 +1,9 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
 	"github.com/Jeffail/gabs/v2"
-	"github.com/dhillondeep/go-uw-api"
-	"google.golang.org/genproto/googleapis/cloud/dialogflow/v2"
+	"github.com/pkg/errors"
 	"net/http"
 	"strings"
 	"uwbot/helpers"
@@ -15,9 +13,9 @@ import (
 
 const uwflowCourseUrl = "https://uwflow.com/course/%s%s"
 
-func HandleCourseReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*dialogflow.WebhookResponse, error) {
-	intentName := qResult.Intent.DisplayName
-	fields := qResult.Parameters.Fields
+func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
+	intentName := context.DialogflowRequest.QueryResult.Intent.DisplayName
+	fields := context.DialogflowRequest.QueryResult.Parameters.Fields
 
 	// fetch course information if any
 	courseInfo := strings.Split(fields["course"].GetStringValue(), " ")
@@ -32,11 +30,11 @@ func HandleCourseReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*d
 
 	switch intentName {
 	case CourseTermAvailability:
-		jsonData, _ := uwClient.Courses.InfoByCatalogNumber(subject, catalogNum)
+		jsonData, _ := context.UWApiClient.Courses.InfoByCatalogNumber(subject, catalogNum)
 
 		// verify course exists
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
-			return responses.CourseNotFoundError(subject, catalogNum)
+			return responses.CourseNotFoundError(subject, catalogNum), nil
 		}
 
 		var termsStr string
@@ -59,16 +57,16 @@ func HandleCourseReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*d
 						Title: "More Info",
 					},
 				},
-			})
+			}), nil
 		} else {
-			return responses.CourseOfferingError(subject, catalogNum)
+			return responses.CourseOfferingError(subject, catalogNum), nil
 		}
 	case CourseAvailabilityGivenTerm:
-		jsonData, _ := uwClient.Courses.InfoByCatalogNumber(subject, catalogNum)
+		jsonData, _ := context.UWApiClient.Courses.InfoByCatalogNumber(subject, catalogNum)
 
 		// verify course exists
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
-			return responses.CourseNotFoundError(subject, catalogNum)
+			return responses.CourseNotFoundError(subject, catalogNum), nil
 		}
 
 		offered := false
@@ -83,16 +81,16 @@ func HandleCourseReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*d
 		}
 
 		if offered {
-			return responses.TextResponsef("%s %s is available in %s term!", subject, catalogNum, termName)
+			return responses.TextResponsef("%s %s is available in %s term!", subject, catalogNum, termName), nil
 		} else {
-			return responses.TextResponsef("%s %s is not available in %s term!", subject, catalogNum, termName)
+			return responses.TextResponsef("%s %s is not available in %s term!", subject, catalogNum, termName), nil
 		}
 	case CourseSections:
-		jsonData, _ := uwClient.Courses.ScheduleByCatalogNumber(subject, catalogNum)
+		jsonData, _ := context.UWApiClient.Courses.ScheduleByCatalogNumber(subject, catalogNum)
 
 		// verify course exists
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
-			return responses.CourseNotFoundError(subject, catalogNum)
+			return responses.CourseNotFoundError(subject, catalogNum), nil
 		}
 
 		var sectionsStr string
@@ -116,31 +114,31 @@ func HandleCourseReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*d
 						Title: "More Info",
 					},
 				},
-			})
+			}), nil
 		} else {
-			return responses.TextResponsef("No sections are available for %s %s", subject, catalogNum)
+			return responses.TextResponsef("No sections are available for %s %s", subject, catalogNum), nil
 		}
 	case CoursePrerequisites:
-		jsonData, _ := uwClient.Courses.PrereqsByCatalogNumber(subject, catalogNum)
+		jsonData, _ := context.UWApiClient.Courses.PrereqsByCatalogNumber(subject, catalogNum)
 
 		// verify course exists
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
-			return responses.CourseNotFoundError(subject, catalogNum)
+			return responses.CourseNotFoundError(subject, catalogNum), nil
 		}
 
 		prerequisites, ok := jsonData.Path("data.prerequisites").Data().(string)
 		if !ok {
-			return responses.CoursePrerequisitesNotFound(subject, catalogNum)
+			return responses.CoursePrerequisitesNotFound(subject, catalogNum), nil
 		}
 
 		return responses.TextResponse(strings.Trim(
-			strings.Replace(prerequisites, "Prereq: ", "", 1), "."))
+			strings.Replace(prerequisites, "Prereq: ", "", 1), ".")), nil
 	case CourseSectionSchedule:
-		jsonData, _ := uwClient.Courses.ScheduleByCatalogNumber(subject, catalogNum)
+		jsonData, _ := context.UWApiClient.Courses.ScheduleByCatalogNumber(subject, catalogNum)
 
 		// verify course exists
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
-			return responses.CourseNotFoundError(subject, catalogNum)
+			return responses.CourseNotFoundError(subject, catalogNum), nil
 		}
 
 		var items []models.FbCarouselItem
@@ -177,9 +175,9 @@ func HandleCourseReq(qResult *dialogflow.QueryResult, uwClient *uwapi.UWAPI) (*d
 		}
 
 		if len(items) > 0 {
-			return responses.FbCarousel(items)
+			return responses.FbCarousel(items), nil
 		} else {
-			return responses.CourseSectionInfoNotFound(subject, catalogNum, sectionGiven)
+			return responses.CourseSectionInfoNotFound(subject, catalogNum, sectionGiven), nil
 		}
 	default:
 		return nil, errors.New("handler does not exist for course intent: " + intentName)

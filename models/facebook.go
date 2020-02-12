@@ -1,5 +1,11 @@
 package models
 
+type FbButton struct {
+	Type  string `json:"type"`
+	Url   string `json:"url"`
+	Title string `json:"title"`
+}
+
 type facebookPayload struct {
 	TemplateType string           `json:"template_type"`
 	Elements     []FbCarouselItem `json:"elements"`
@@ -10,18 +16,8 @@ type facebookAttachment struct {
 	Payload facebookPayload `json:"payload,"`
 }
 
-type FbButton struct {
-	Type  string `json:"type"`
-	Url   string `json:"url"`
-	Title string `json:"title"`
-}
-
 type facebook struct {
 	Attachment facebookAttachment `json:"attachment"`
-}
-
-type payload struct {
-	Facebook facebook `json:"facebook,omitempty"`
 }
 
 type FbCarouselItem struct {
@@ -30,25 +26,21 @@ type FbCarouselItem struct {
 	Buttons  []FbButton `json:"buttons,omitempty"`
 }
 
-type FbCarousel struct {
-	Payload payload `json:"payload"`
-}
-
 // CreateFbCarouselCard creates a single carousel card on messenger
-func CreateFbCarouselCard(item FbCarouselItem) *FbCarousel {
+func CreateFbCarouselCard(item FbCarouselItem) *DialogflowResponse {
 	return CreateFbCarousel([]FbCarouselItem{item})
 }
 
 // CreateFbCarousel creates a carousel cards on messenger
 // This supports many cards and should be used as a lit
-func CreateFbCarousel(items []FbCarouselItem) *FbCarousel {
+func CreateFbCarousel(items []FbCarouselItem) *DialogflowResponse {
 	itemsShow := items
 
 	if len(itemsShow) > 10 {
 		itemsShow = itemsShow[:10]
 	}
 
-	carousel := &FbCarousel{
+	carousel := &DialogflowResponse{
 		Payload: payload{
 			Facebook: facebook{
 				Attachment: facebookAttachment{
