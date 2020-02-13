@@ -1,4 +1,4 @@
-![CI](https://github.com/dhillondeep/uwbot-fulfilment/workflows/CI/badge.svg)
+![CI](https://github.com/dhillondeep/uwbot-fulfilment/workflows/CI/badge.svg)  ![Deployment](https://github.com/dhillondeep/uwbot-fulfilment/workflows/Deployment/badge.svg)
 
 # UWBot Fulfillment
 UWBot is a chatbot that provides University of Waterloo related information in a interactive way! Currently it supports:
