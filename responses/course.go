@@ -45,6 +45,30 @@ func NoCourseSectionAvailable(fields *models.Fields) *models.RespContext {
 	return TextResponsef("There are currently no sections for %s %s", fields.Subject, fields.CatalogNum)
 }
 
+func CourseNotOfferedNextTerm(fields *models.Fields) *models.RespContext {
+	return TextResponsef("%s %s is not offered next term", fields.Subject, fields.CatalogNum)
+}
+
+func CourseOfferedNextTerm(fields *models.Fields) *models.RespContext {
+	return TextResponsef("%s %s is offered next term!", fields.Subject, fields.CatalogNum)
+}
+
+func CourseNotOfferedPrevTerm(fields *models.Fields) *models.RespContext {
+	return TextResponsef("%s %s was not offered last term", fields.Subject, fields.CatalogNum)
+}
+
+func CourseOfferedPrevTerm(fields *models.Fields) *models.RespContext {
+	return TextResponsef("%s %s was offered last term!", fields.Subject, fields.CatalogNum)
+}
+
+func CourseNotOfferedCurrTerm(fields *models.Fields) *models.RespContext {
+	return TextResponsef("%s %s is not offered this term", fields.Subject, fields.CatalogNum)
+}
+
+func CourseOfferedCurrTerm(fields *models.Fields) *models.RespContext {
+	return TextResponsef("%s %s is being offered this term!", fields.Subject, fields.CatalogNum)
+}
+
 func TermsWhenCourseAvailable(terms []string, fields *models.Fields) *models.RespContext {
 	return genericCourseCarouselCardResp(
 		fmt.Sprintf("Terms when %s %s is offered", fields.Subject, fields.CatalogNum),
@@ -69,4 +93,22 @@ func SectionInformationItem(sectionInfo string, fields *models.Fields, section s
 			},
 		},
 	}
+}
+
+func SectionEnrollmentInfoItem(enrollmentInfo string, fields *models.Fields, section string) *models.FbCarouselItem {
+	return &models.FbCarouselItem{
+		Title:    fmt.Sprintf("%s %s %s", fields.Subject, fields.CatalogNum, section),
+		Subtitle: strings.TrimSpace(enrollmentInfo),
+		Buttons: []models.FbButton{
+			{
+				Type:  "web_url",
+				Url:   fmt.Sprintf(helpers.UWFlowCourseUrl, fields.Subject, fields.CatalogNum),
+				Title: "More Info",
+			},
+		},
+	}
+}
+
+func CourseInformation(title, desc string, fields *models.Fields) *models.RespContext {
+	return genericCourseCarouselCardResp(title, desc, fields)
 }
