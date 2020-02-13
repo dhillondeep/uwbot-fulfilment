@@ -21,14 +21,14 @@ func TextResponsef(format string, a ...interface{}) *models.RespContext {
 	return TextResponse(fmt.Sprintf(format, a...))
 }
 
-func FbCarouselCard(item models.FbCarouselItem) *models.RespContext {
+func FbCarouselCard(item *models.FbCarouselItem) *models.RespContext {
 	return &models.RespContext{
 		StatusCode: http.StatusOK,
 		Resp:       models.CreateFbCarouselCard(item),
 	}
 }
 
-func FbCarousel(items []models.FbCarouselItem) *models.RespContext {
+func FbCarousel(items []*models.FbCarouselItem) *models.RespContext {
 	return &models.RespContext{
 		StatusCode: http.StatusOK,
 		Resp:       models.CreateFbCarousel(items),

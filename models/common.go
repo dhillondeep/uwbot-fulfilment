@@ -5,6 +5,13 @@ import (
 	"google.golang.org/genproto/googleapis/cloud/dialogflow/v2"
 )
 
+type Fields struct {
+	Subject    string
+	CatalogNum string
+	Term       string
+	Section    string
+}
+
 type RespContext struct {
 	StatusCode int
 	Resp       *DialogflowResponse
@@ -13,6 +20,7 @@ type RespContext struct {
 type ReqContext struct {
 	UWApiClient       *uwapi.UWAPI
 	DialogflowRequest *dialogflow.WebhookRequest
+	Fields            *Fields
 }
 
 type payload struct {

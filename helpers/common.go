@@ -3,8 +3,15 @@ package helpers
 import (
 	"fmt"
 	"github.com/Jeffail/gabs/v2"
+	structpb "github.com/golang/protobuf/ptypes/struct"
+	"regexp"
 	"strings"
 )
+
+const UWFlowCourseUrl = "https://uwflow.com/course/%s%s"
+
+var CourseSubjectReg = regexp.MustCompile(`[A-Za-z]+`)
+var CourseCatalogReg = regexp.MustCompile(`[0-9]+[A-Za-z]*`)
 
 var termsShortHand = map[string]string{"w": "Winter", "s": "Spring", "f": "Fall"}
 
@@ -38,4 +45,10 @@ func StringEqualNoCase(first, second string) bool {
 
 func StringIsEmpty(text string) bool {
 	return strings.TrimSpace(text) == ""
+}
+
+func DoIfFieldsContains(fields map[string]*structpb.Value, key string, function func(string)) {
+	if val, ok := fields[key]; ok {
+		function(strings.TrimSpace(val.GetStringValue()))
+	}
 }
