@@ -11,7 +11,9 @@ import (
 func TextResponse(text string) *models.RespContext {
 	return &models.RespContext{
 		StatusCode: http.StatusOK,
-		Resp:       models.CreateTextResponse(strings.Trim(strings.TrimSpace(text), ",")),
+		Resp: &models.DialogflowResponse{
+			FulfillmentText: strings.TrimSpace(text),
+		},
 	}
 }
 
@@ -22,15 +24,31 @@ func TextResponsef(format string, a ...interface{}) *models.RespContext {
 }
 
 func FbCarouselCard(item *models.FbCarouselItem) *models.RespContext {
-	return &models.RespContext{
-		StatusCode: http.StatusOK,
-		Resp:       models.CreateFbCarouselCard(item),
-	}
+	return FbCarousel([]*models.FbCarouselItem{item})
 }
 
 func FbCarousel(items []*models.FbCarouselItem) *models.RespContext {
+	itemsShow := items
+
+	// facebook limitation and does not render if num cards > 10
+	if len(itemsShow) > 10 {
+		itemsShow = itemsShow[:10]
+	}
+
 	return &models.RespContext{
 		StatusCode: http.StatusOK,
-		Resp:       models.CreateFbCarousel(items),
+		Resp: &models.DialogflowResponse{
+			Payload: &models.Payload{
+				Facebook: &models.Facebook{
+					Attachment: models.FbAttachment{
+						Type: "template",
+						Payload: models.FbPayload{
+							TemplateType: "generic",
+							Elements:     itemsShow,
+						},
+					},
+				},
+			},
+		},
 	}
 }

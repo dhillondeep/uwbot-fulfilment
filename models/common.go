@@ -23,19 +23,12 @@ type ReqContext struct {
 	Fields            *Fields
 }
 
-type payload struct {
-	Facebook facebook `json:"facebook,omitempty"`
+type Payload struct {
+	Facebook *Facebook `json:"facebook,omitempty"`
 }
 
 type DialogflowResponse struct {
 	FulfillmentText string   `json:"fulfillment_text,omitempty"`
-	Payload         *payload `json:"payload,omitempty"`
+	Payload         *Payload `json:"payload,omitempty"`
 	Source          string   `json:"source,omitempty"`
-}
-
-// CreateTextResponse creates basic text response
-func CreateTextResponse(text string) *DialogflowResponse {
-	return &DialogflowResponse{
-		FulfillmentText: text,
-	}
 }
