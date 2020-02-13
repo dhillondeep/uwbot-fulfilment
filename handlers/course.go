@@ -1,45 +1,32 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/Jeffail/gabs/v2"
 	"github.com/pkg/errors"
 	"net/http"
-	"strings"
 	"uwbot/helpers"
 	"uwbot/models"
 	"uwbot/responses"
 )
 
-const uwflowCourseUrl = "https://uwflow.com/course/%s%s"
-
 func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 	intentName := context.DialogflowRequest.QueryResult.Intent.DisplayName
-	fields := context.DialogflowRequest.QueryResult.Parameters.Fields
-
-	// fetch course information if any
-	courseInfo := strings.Split(fields["course"].GetStringValue(), " ")
-	subject := courseInfo[0]
-	catalogNum := courseInfo[1]
-
-	// fetch term information if any
-	termName := fields["term"].GetStringValue()
-
-	// fetch section information if any
-	sectionGiven := fields["section"].GetStringValue()
+	provSubject := context.Fields.Subject
+	provCatalogNum := context.Fields.CatalogNum
+	provTerm := context.Fields.Term
 
 	switch intentName {
 	case CourseTermAvailability:
-		jsonData, _ := context.UWApiClient.Courses.InfoByCatalogNumber(subject, catalogNum)
+		jsonData, _ := context.UWApiClient.Courses.InfoByCatalogNumber(provSubject, provCatalogNum)
 
 		// verify course exists
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
-			return responses.CourseNotFound(subject, catalogNum), nil
+			return responses.CourseNotFound(context.Fields), nil
 		}
 
-		var termsStr string
+		var terms []string
 		count, err := helpers.IterateContainerData(jsonData, "data.terms_offered", func(path *gabs.Container) error {
-			termsStr += fmt.Sprintf("%s\n", helpers.ConvertTermShorthandToFull(path.Data().(string)))
+			terms = append(terms, helpers.ConvertTermShorthandToFull(path.Data().(string)))
 			return nil
 		})
 		if err != nil {
@@ -47,32 +34,22 @@ func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 		}
 
 		if count > 0 {
-			return responses.FbCarouselCard(models.FbCarouselItem{
-				Title:    fmt.Sprintf("Terms when %s %s is offered", subject, catalogNum),
-				Subtitle: strings.TrimSpace(termsStr),
-				Buttons: []models.FbButton{
-					{
-						Type:  "web_url",
-						Url:   fmt.Sprintf(uwflowCourseUrl, subject, catalogNum),
-						Title: "More Info",
-					},
-				},
-			}), nil
+			return responses.TermsWhenCourseAvailable(terms, context.Fields), nil
 		} else {
-			return responses.CourseOfferingNotFound(subject, catalogNum), nil
+			return responses.CourseOfferingNotFound(context.Fields), nil
 		}
 	case CourseAvailabilityGivenTerm:
-		jsonData, _ := context.UWApiClient.Courses.InfoByCatalogNumber(subject, catalogNum)
+		jsonData, _ := context.UWApiClient.Courses.InfoByCatalogNumber(provSubject, provCatalogNum)
 
 		// verify course exists
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
-			return responses.CourseNotFound(subject, catalogNum), nil
+			return responses.CourseNotFound(context.Fields), nil
 		}
 
 		offered := false
 		if _, err := helpers.IterateContainerData(jsonData, "data.terms_offered", func(path *gabs.Container) error {
 			termInfo := path.Data().(string)
-			if helpers.StringEqualNoCase(termInfo, termName) {
+			if helpers.StringEqualNoCase(termInfo, provTerm) {
 				offered = true
 			}
 			return nil
@@ -81,22 +58,21 @@ func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 		}
 
 		if offered {
-			return responses.TextResponsef("%s %s is available in %s term!", subject, catalogNum, termName), nil
+			return responses.CourseAvailableInTerm(context.Fields), nil
 		} else {
-			return responses.TextResponsef("%s %s is not available in %s term!", subject, catalogNum, termName), nil
+			return responses.CourseNotAvailableInTerm(context.Fields), nil
 		}
 	case CourseSections:
-		jsonData, _ := context.UWApiClient.Courses.ScheduleByCatalogNumber(subject, catalogNum)
+		jsonData, _ := context.UWApiClient.Courses.ScheduleByCatalogNumber(provSubject, provCatalogNum)
 
-		// verify course exists
+		// verify if course exists
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
-			return responses.CourseNotFound(subject, catalogNum), nil
+			return responses.CourseNotFound(context.Fields), nil
 		}
 
-		var sectionsStr string
+		var sections []string
 		count, err := helpers.IterateContainerData(jsonData, "data", func(path *gabs.Container) error {
-			section := path.Path("section").Data().(string)
-			sectionsStr += fmt.Sprintf("%s\n", section)
+			sections = append(sections, path.Path("section").Data().(string))
 			return nil
 		})
 		if err != nil {
@@ -104,39 +80,30 @@ func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 		}
 
 		if count > 0 {
-			return responses.FbCarouselCard(models.FbCarouselItem{
-				Title:    fmt.Sprintf("Sections available for %s %s", subject, catalogNum),
-				Subtitle: strings.TrimSpace(sectionsStr),
-				Buttons: []models.FbButton{
-					{
-						Type:  "web_url",
-						Url:   fmt.Sprintf(uwflowCourseUrl, subject, catalogNum),
-						Title: "More Info",
-					},
-				},
-			}), nil
+			return responses.SectionsAvailableForCourse(sections, context.Fields), nil
 		} else {
-			return responses.TextResponsef("No sections are available for %s %s", subject, catalogNum), nil
+			return responses.NoCourseSectionAvailable(context.Fields), nil
 		}
 	case CoursePrerequisites:
-		jsonData, _ := context.UWApiClient.Courses.PrereqsByCatalogNumber(subject, catalogNum)
+		jsonData, _ := context.UWApiClient.Courses.PrereqsByCatalogNumber(provSubject, provCatalogNum)
 
 		// verify if prerequisite exist
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
-			return responses.CoursePrereqNotFound(subject, catalogNum), nil
+			return responses.CoursePrereqNotFound(context.Fields), nil
 		}
 
 		prerequisites := jsonData.Path("data.prerequisites").Data().(string)
 		return responses.TextResponse(helpers.CleanPrereqString(prerequisites)), nil
-	case CourseSectionSchedule:
-		jsonData, _ := context.UWApiClient.Courses.ScheduleByCatalogNumber(subject, catalogNum)
+	case CourseSectionsInformation:
+		sectionGiven := context.Fields.Section
+		jsonData, _ := context.UWApiClient.Courses.ScheduleByCatalogNumber(provSubject, provCatalogNum)
 
 		// verify course exists
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
-			return responses.CourseNotFound(subject, catalogNum), nil
+			return responses.CourseNotFound(context.Fields), nil
 		}
 
-		var items []models.FbCarouselItem
+		var items []*models.FbCarouselItem
 
 		// iterate over each section
 		if _, err := helpers.IterateContainerData(jsonData, "data", func(path *gabs.Container) error {
@@ -145,19 +112,8 @@ func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 			if helpers.StringIsEmpty(sectionGiven) || helpers.StringEqualNoCase(sectionGiven, section) {
 				// iterate over each class for that section
 				if _, err := helpers.IterateContainerData(path, "classes", func(path *gabs.Container) error {
-					infoStr := helpers.CreateCourseSectionSchedule(path)
-					items = append(items, models.FbCarouselItem{
-						Title:    section,
-						Subtitle: strings.TrimSpace(infoStr),
-						Buttons: []models.FbButton{
-							{
-								Type:  "web_url",
-								Url:   fmt.Sprintf(uwflowCourseUrl, subject, catalogNum),
-								Title: "More Info",
-							},
-						},
-					})
-
+					sectionInfo := helpers.CreateCourseSectionSchedule(path)
+					items = append(items, responses.SectionInformationItem(sectionInfo, context.Fields))
 					return nil
 				}); err != nil {
 					return err
@@ -172,7 +128,7 @@ func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 		if len(items) > 0 {
 			return responses.FbCarousel(items), nil
 		} else {
-			return responses.NoCourseSecFound(subject, catalogNum), nil
+			return responses.NoCourseSectionAvailable(context.Fields), nil
 		}
 	default:
 		return nil, errors.New("handler does not exist for course intent: " + intentName)

@@ -7,8 +7,8 @@ type FbButton struct {
 }
 
 type facebookPayload struct {
-	TemplateType string           `json:"template_type"`
-	Elements     []FbCarouselItem `json:"elements"`
+	TemplateType string            `json:"template_type"`
+	Elements     []*FbCarouselItem `json:"elements"`
 }
 
 type facebookAttachment struct {
@@ -27,13 +27,13 @@ type FbCarouselItem struct {
 }
 
 // CreateFbCarouselCard creates a single carousel card on messenger
-func CreateFbCarouselCard(item FbCarouselItem) *DialogflowResponse {
-	return CreateFbCarousel([]FbCarouselItem{item})
+func CreateFbCarouselCard(item *FbCarouselItem) *DialogflowResponse {
+	return CreateFbCarousel([]*FbCarouselItem{item})
 }
 
 // CreateFbCarousel creates a carousel cards on messenger
 // This supports many cards and should be used as a lit
-func CreateFbCarousel(items []FbCarouselItem) *DialogflowResponse {
+func CreateFbCarousel(items []*FbCarouselItem) *DialogflowResponse {
 	itemsShow := items
 
 	if len(itemsShow) > 10 {

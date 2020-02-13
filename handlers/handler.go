@@ -8,6 +8,26 @@ import (
 	"uwbot/models"
 )
 
+func fetchAndCreateFields(context *models.ReqContext) {
+	dialogflowFields := context.DialogflowRequest.QueryResult.Parameters.Fields
+
+	// fetch course event if any
+	helpers.DoIfFieldsContains(dialogflowFields, "course", func(s string) {
+		context.Fields.Subject = helpers.CourseSubjectReg.FindStringSubmatch(s)[0]
+		context.Fields.CatalogNum = helpers.CourseSubjectReg.FindStringSubmatch(s)[0]
+	})
+
+	// fetch term event if any
+	helpers.DoIfFieldsContains(dialogflowFields, "term", func(s string) {
+		context.Fields.Term = s
+	})
+
+	// fetch section event if any
+	helpers.DoIfFieldsContains(dialogflowFields, "term", func(s string) {
+		context.Fields.Term = s
+	})
+}
+
 func HandleWebhook(context *models.ReqContext) (*models.RespContext, error) {
 	request := context.DialogflowRequest
 
@@ -21,6 +41,9 @@ func HandleWebhook(context *models.ReqContext) (*models.RespContext, error) {
 			StatusCode: http.StatusOK,
 		}, nil
 	}
+
+	// parse and store dialogflow fields in context
+	fetchAndCreateFields(context)
 
 	switch intentCat {
 	case CourseIntent:
