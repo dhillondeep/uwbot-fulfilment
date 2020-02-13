@@ -76,13 +76,13 @@ func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 	case CoursePrerequisites:
 		jsonData, _ := context.UWApiClient.Courses.PrereqsByCatalogNumber(provSubject, provCatalogNum)
 
-		// verify if prerequisite exist
+		// verify if prerequisites exist
 		if helpers.GetStatusCode(jsonData) != http.StatusOK {
 			return responses.CoursePrereqNotFound(context.Fields), nil
 		}
 
 		prerequisites := jsonData.Path("data.prerequisites").Data().(string)
-		return responses.TextResponse(helpers.CleanPrereqString(prerequisites)), nil
+		return responses.CoursePrerequisites(prerequisites), nil
 	case CourseSectionsInformation:
 		provSection := context.Fields.Section
 		jsonData, _ := context.UWApiClient.Courses.ScheduleByCatalogNumber(provSubject, provCatalogNum)
@@ -96,8 +96,7 @@ func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 			if helpers.StringIsEmpty(provSection) || helpers.StringEqualNoCase(provSection, section) {
 				// iterate over each class for that section
 				if _, err := helpers.IterateContainerData(path, "classes", func(path *gabs.Container) error {
-					sectionInfo := helpers.CreateCourseSectionSchedule(path)
-					items = append(items, responses.SectionInformationItem(sectionInfo, context.Fields, section))
+					items = append(items, responses.SectionInformationItem(path, context.Fields, section))
 					return nil
 				}); err != nil {
 					return err
