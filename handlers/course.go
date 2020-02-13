@@ -10,6 +10,8 @@ import (
 	"uwbot/responses"
 )
 
+// HandleCourseReq handles any request that has intent category of course
+// All the logic for creating response is in here and each intent is handled case by case
 func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 	intentName := context.DialogflowRequest.QueryResult.Intent.DisplayName
 	provSubject := context.Fields.Subject
@@ -196,6 +198,6 @@ func HandleCourseReq(context *models.ReqContext) (*models.RespContext, error) {
 		return responses.CourseInformation(title, desc, context.Fields), nil
 
 	default:
-		return nil, errors.New("handler does not exist for course intent: " + intentName)
+		return nil, errors.New(fmt.Sprintf("handler does not exist for course intent: %s", intentName))
 	}
 }

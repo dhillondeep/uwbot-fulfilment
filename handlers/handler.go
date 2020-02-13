@@ -8,6 +8,8 @@ import (
 	"uwbot/models"
 )
 
+// parses fields provided by dialogflow and after validating, stores them in request context
+// so that these values can be used later on
 func fetchAndCreateFields(context *models.ReqContext) {
 	dialogflowFields := context.DialogflowRequest.QueryResult.Parameters.Fields
 
@@ -30,6 +32,8 @@ func fetchAndCreateFields(context *models.ReqContext) {
 	})
 }
 
+// HandleWebhook handles a generic Dialogflow webhook request wrapped inside custom model
+// It returns a generic response model containing fulfilment response data
 func HandleWebhook(context *models.ReqContext) (*models.RespContext, error) {
 	request := context.DialogflowRequest
 

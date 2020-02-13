@@ -7,7 +7,7 @@ import (
 	"uwbot/models"
 )
 
-// TextResponse creates dialogflow webhook response for simple text
+// TextResponse creates response for simple fulfilment text
 func TextResponse(text string) *models.RespContext {
 	return &models.RespContext{
 		StatusCode: http.StatusOK,
@@ -17,16 +17,17 @@ func TextResponse(text string) *models.RespContext {
 	}
 }
 
-// TextResponsef creates dialogflow webhook response for simple text but,
-// it allows the text to be formatted
+// TextResponsef creates response for simple fulfilment text but, it allows the text to be formatted
 func TextResponsef(format string, a ...interface{}) *models.RespContext {
 	return TextResponse(fmt.Sprintf(format, a...))
 }
 
+// FbCarouselCard creates a single carousel card response
 func FbCarouselCard(item *models.FbCarouselItem) *models.RespContext {
 	return FbCarousel([]*models.FbCarouselItem{item})
 }
 
+// FbCarousel creates carousel with multiple items as a response
 func FbCarousel(items []*models.FbCarouselItem) *models.RespContext {
 	itemsShow := items
 
