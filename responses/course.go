@@ -47,19 +47,19 @@ func NoCourseSectionAvailable(fields *models.Fields) *models.RespContext {
 
 func TermsWhenCourseAvailable(terms []string, fields *models.Fields) *models.RespContext {
 	return genericCourseCarouselCardResp(
-		fmt.Sprintf("Terms when %s %s is offered:", fields.Subject, fields.CatalogNum),
+		fmt.Sprintf("Terms when %s %s is offered", fields.Subject, fields.CatalogNum),
 		strings.Join(terms, "\n"), fields)
 }
 
 func SectionsAvailableForCourse(sections []string, fields *models.Fields) *models.RespContext {
 	return genericCourseCarouselCardResp(
-		fmt.Sprintf("Sections available for %s %s:", fields.Subject, fields.CatalogNum),
+		fmt.Sprintf("Sections available for %s %s", fields.Subject, fields.CatalogNum),
 		strings.Join(sections, "\n"), fields)
 }
 
-func SectionInformationItem(sectionInfo string, fields *models.Fields) *models.FbCarouselItem {
+func SectionInformationItem(sectionInfo string, fields *models.Fields, section string) *models.FbCarouselItem {
 	return &models.FbCarouselItem{
-		Title:    fmt.Sprintf("%s %s %s:", fields.Subject, fields.CatalogNum, fields.Section),
+		Title:    fmt.Sprintf("%s %s %s", fields.Subject, fields.CatalogNum, section),
 		Subtitle: strings.TrimSpace(sectionInfo),
 		Buttons: []models.FbButton{
 			{

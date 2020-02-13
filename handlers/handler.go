@@ -11,10 +11,12 @@ import (
 func fetchAndCreateFields(context *models.ReqContext) {
 	dialogflowFields := context.DialogflowRequest.QueryResult.Parameters.Fields
 
+	context.Fields = &models.Fields{}
+
 	// fetch course event if any
 	helpers.DoIfFieldsContains(dialogflowFields, "course", func(s string) {
-		context.Fields.Subject = helpers.CourseSubjectReg.FindStringSubmatch(s)[0]
-		context.Fields.CatalogNum = helpers.CourseSubjectReg.FindStringSubmatch(s)[0]
+		context.Fields.Subject = helpers.CourseSubjectReg.FindString(s)
+		context.Fields.CatalogNum = helpers.CourseCatalogReg.FindString(s)
 	})
 
 	// fetch term event if any
