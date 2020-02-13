@@ -1,12 +1,34 @@
 package models
 
-type DialogflowResponse struct {
-	FulfillmentText string `json:"fulfillment_text"`
+import (
+	"github.com/dhillondeep/go-uw-api"
+	"google.golang.org/genproto/googleapis/cloud/dialogflow/v2"
+)
+
+type Fields struct {
+	Subject    string
+	CatalogNum string
+	Term       string
+	Section    string
 }
 
-// CreateTextResponse creates basic text response
-func CreateTextResponse(text string) *DialogflowResponse {
-	return &DialogflowResponse{
-		FulfillmentText: text,
-	}
+type RespContext struct {
+	StatusCode int
+	Resp       *DialogflowResponse
+}
+
+type ReqContext struct {
+	UWApiClient       *uwapi.UWAPI
+	DialogflowRequest *dialogflow.WebhookRequest
+	Fields            *Fields
+}
+
+type Payload struct {
+	Facebook *Facebook `json:"facebook,omitempty"`
+}
+
+type DialogflowResponse struct {
+	FulfillmentText string   `json:"fulfillment_text,omitempty"`
+	Payload         *Payload `json:"payload,omitempty"`
+	Source          string   `json:"source,omitempty"`
 }
