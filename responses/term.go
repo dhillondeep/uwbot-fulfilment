@@ -24,16 +24,16 @@ func CourseOfferedPrevTerm(fields *models.Fields) *models.RespContext {
 }
 
 func CourseNotOfferedCurrTerm(fields *models.Fields) *models.RespContext {
-	return TextResponsef("%s %s is not this term", fields.Subject, fields.CatalogNum)
+	return TextResponsef("%s %s is not offered this term", fields.Subject, fields.CatalogNum)
 }
 
 func CourseOfferedCurrTerm(fields *models.Fields) *models.RespContext {
-	return TextResponsef("%s %s is being offered term!", fields.Subject, fields.CatalogNum)
+	return TextResponsef("%s %s is being offered this term!", fields.Subject, fields.CatalogNum)
 }
 
 func SectionEnrollmentInfoItem(enrollmentInfo string, fields *models.Fields) *models.FbCarouselItem {
 	return &models.FbCarouselItem{
-		Title:    fmt.Sprintf("%s %s %s:", fields.Subject, fields.CatalogNum, fields.Section),
+		Title:    fmt.Sprintf("%s %s %s", fields.Subject, fields.CatalogNum, fields.Section),
 		Subtitle: strings.TrimSpace(enrollmentInfo),
 		Buttons: []models.FbButton{
 			{
