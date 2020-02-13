@@ -25,8 +25,8 @@ func fetchAndCreateFields(context *models.ReqContext) {
 	})
 
 	// fetch section event if any
-	helpers.DoIfFieldsContains(dialogflowFields, "term", func(s string) {
-		context.Fields.Term = s
+	helpers.DoIfFieldsContains(dialogflowFields, "section", func(s string) {
+		context.Fields.Section = s
 	})
 }
 
@@ -50,8 +50,6 @@ func HandleWebhook(context *models.ReqContext) (*models.RespContext, error) {
 	switch intentCat {
 	case CourseIntent:
 		return HandleCourseReq(context)
-	case TermIntent:
-		return HandleTermReq(context)
 	default:
 		return nil, errors.New("handler does not exist for intent category: " + intentCat)
 	}
